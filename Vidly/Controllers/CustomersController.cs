@@ -1,23 +1,79 @@
-﻿using System.Collections.Generic;
+﻿using System.Data.Entity;
 using System.Linq;
 using System.Web.Mvc;
 using Vidly.Models;
+using Vidly.ViewModels;
 
 namespace Vidly.Controllers
 {
     public class CustomersController : Controller
     {
+        private readonly ApplicationDbContext _context;
+
+        public CustomersController()
+        {
+            _context = new ApplicationDbContext();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            _context.Dispose();
+        }
+
+        public ActionResult New()
+        {
+            var membershipTypes = _context.MembershipTypes.ToList();
+            var viewModel = new CustomerFormViewModel()
+            {
+                Customer = new Customer(),
+                MembershipTypes = membershipTypes
+            };
+            return View("CustomerForm",viewModel);
+        }
+
+        [ValidateAntiForgeryToken]
+        [HttpPost]
+        public ActionResult Save(Customer customer)
+        { 
+            if (!ModelState.IsValid)
+            {
+                var viewModel = new CustomerFormViewModel()
+                {
+                    Customer = customer,
+                    MembershipTypes = _context.MembershipTypes.ToList()
+                };
+                return View("CustomerForm", viewModel);
+            }
+
+
+            if (customer.Id == 0)
+            _context.Customers.Add(customer);
+
+           else
+           {
+               var customerInDb = _context.Customers.Single(m => m.Id == customer.Id);
+               
+               //Update Properties
+               customerInDb.Name = customer.Name;
+               customerInDb.Birthdate = customer.Birthdate;
+               customerInDb.MembershipType = customer.MembershipType;
+               customerInDb.IsSubscribedtoNewsletter = customer.IsSubscribedtoNewsletter;
+           }
+            _context.SaveChanges();
+
+            return RedirectToAction("Index", "Customers");
+        }
         // GET: Customers
         public ActionResult Index()
         {
-            var customers = GetCustomers();
-
-            return View(customers);
+            return View();
         }
 
         public ActionResult Details(int id)
         {
-            var customer = GetCustomers().SingleOrDefault(c => c.Id == id);
+            var customer = _context.Customers
+                .Include(c => c.MembershipType)
+                .SingleOrDefault(c => c.Id == id);
 
             if (customer == null)
                 return HttpNotFound();
@@ -25,13 +81,20 @@ namespace Vidly.Controllers
             return View(customer);
         }
 
-        public IEnumerable<Customer> GetCustomers()
+        public ActionResult Edit(int id)
         {
-            return new List<Customer>
+            var customer = _context.Customers.SingleOrDefault(c => c.Id == id);
+
+            if (customer == null)
+                return HttpNotFound();
+
+            var viewModel = new CustomerFormViewModel()
             {
-                new Customer() {Id = 1, Name = "Mary Williams"},
-                new Customer() {Id = 2, Name = "John Smith"}
+                Customer = customer,
+                MembershipTypes = _context.MembershipTypes.ToList()
             };
+
+            return View("CustomerForm", viewModel);
         }
     }
 }

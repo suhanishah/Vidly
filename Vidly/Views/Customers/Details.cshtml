@@ -7,9 +7,21 @@
 <h2>Details</h2>
 
 <div>
-    <h4>Customer</h4>
-    <hr />
-    <dl class="dl-horizontal">
+    <h3>@Model.Name</h3>
+    
+    <ul>
+        <li>Membership Type : @Model.MembershipType.MembershipName</li>
+        @if (Model.Birthdate.HasValue)
+        {
+            <li>Birthdate: @Model.Birthdate.Value.ToShortDateString()</li>
+        }
+    </ul>
+    
+    
+    
+    
+
+    @*<dl class="dl-horizontal">
         <dt>
             @Html.DisplayNameFor(model => model.Name)
         </dt>
@@ -17,8 +29,22 @@
         <dd>
             @Html.DisplayFor(model => model.Name)
         </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.MembershipType.MembershipName)
+        </dt>
 
-    </dl>
+        <dd>
+            @Html.DisplayFor(model => model.MembershipType.MembershipName)
+        </dd>
+        
+        <dt>
+            @Html.DisplayNameFor(model => model.Birthdate)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Birthdate)
+        </dd>
+    </dl>*@
 </div>
 <p>
     @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
