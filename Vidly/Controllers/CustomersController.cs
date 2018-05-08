@@ -20,6 +20,16 @@ namespace Vidly.Controllers
             _context.Dispose();
         }
 
+        // GET: Customers
+        public ActionResult Index()
+        {
+            if (User.IsInRole(RoleName.CanManageMovie))
+                return View("List");
+
+            return View("ReadOnlyList");
+        }
+
+        [Authorize(Roles = RoleName.CanManageMovie)]
         public ActionResult New()
         {
             var membershipTypes = _context.MembershipTypes.ToList();
@@ -28,13 +38,14 @@ namespace Vidly.Controllers
                 Customer = new Customer(),
                 MembershipTypes = membershipTypes
             };
-            return View("CustomerForm",viewModel);
+            return View("CustomerForm", viewModel);
         }
 
         [ValidateAntiForgeryToken]
         [HttpPost]
+        [System.Web.Http.Authorize(Roles = RoleName.CanManageMovie)]
         public ActionResult Save(Customer customer)
-        { 
+        {
             if (!ModelState.IsValid)
             {
                 var viewModel = new CustomerFormViewModel()
@@ -47,27 +58,24 @@ namespace Vidly.Controllers
 
 
             if (customer.Id == 0)
-            _context.Customers.Add(customer);
+                _context.Customers.Add(customer);
 
-           else
-           {
-               var customerInDb = _context.Customers.Single(m => m.Id == customer.Id);
-               
-               //Update Properties
-               customerInDb.Name = customer.Name;
-               customerInDb.Birthdate = customer.Birthdate;
-               customerInDb.MembershipType = customer.MembershipType;
-               customerInDb.IsSubscribedtoNewsletter = customer.IsSubscribedtoNewsletter;
-           }
+            else
+            {
+                var customerInDb = _context.Customers.Single(m => m.Id == customer.Id);
+
+                //Update Properties
+                customerInDb.Name = customer.Name;
+                customerInDb.Birthdate = customer.Birthdate;
+                customerInDb.MembershipType = customer.MembershipType;
+                customerInDb.IsSubscribedtoNewsletter = customer.IsSubscribedtoNewsletter;
+            }
             _context.SaveChanges();
 
             return RedirectToAction("Index", "Customers");
         }
-        // GET: Customers
-        public ActionResult Index()
-        {
-            return View();
-        }
+
+
 
         public ActionResult Details(int id)
         {
@@ -80,6 +88,8 @@ namespace Vidly.Controllers
 
             return View(customer);
         }
+
+        [Authorize(Roles = RoleName.CanManageMovie)]
 
         public ActionResult Edit(int id)
         {

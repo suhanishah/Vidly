@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using System;
-using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Web.Http;
@@ -19,7 +18,7 @@ namespace Vidly.Controllers.API
         }
 
         //Get - a lits of customers - /api/customers
-        public IEnumerable<MovieDto> GetMovies(string query = null)
+        public IHttpActionResult GetMovies(string query = null)
         {
             var moviesQuery = _context.Movies
                 .Include(m => m.Genre)
@@ -28,9 +27,11 @@ namespace Vidly.Controllers.API
             if (!String.IsNullOrWhiteSpace(query))
                 moviesQuery = moviesQuery.Where(m => m.Name.Contains(query));
 
-            return moviesQuery
+            var movieDtos = moviesQuery
                 .ToList()
                 .Select(Mapper.Map<Movie, MovieDto>);
+
+            return Ok(movieDtos);
 
 
         }

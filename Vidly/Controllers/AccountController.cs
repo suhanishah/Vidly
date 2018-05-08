@@ -20,7 +20,7 @@ namespace Vidly.Controllers
         {
         }
 
-        public AccountController(ApplicationUserManager userManager, ApplicationSignInManager signInManager )
+        public AccountController(ApplicationUserManager userManager, ApplicationSignInManager signInManager)
         {
             UserManager = userManager;
             SignInManager = signInManager;
@@ -32,9 +32,9 @@ namespace Vidly.Controllers
             {
                 return _signInManager ?? HttpContext.GetOwinContext().Get<ApplicationSignInManager>();
             }
-            private set 
-            { 
-                _signInManager = value; 
+            private set
+            {
+                _signInManager = value;
             }
         }
 
@@ -118,7 +118,7 @@ namespace Vidly.Controllers
             // If a user enters incorrect codes for a specified amount of time then the user account 
             // will be locked out for a specified amount of time. 
             // You can configure the account lockout settings in IdentityConfig
-            var result = await SignInManager.TwoFactorSignInAsync(model.Provider, model.Code, isPersistent:  model.RememberMe, rememberBrowser: model.RememberBrowser);
+            var result = await SignInManager.TwoFactorSignInAsync(model.Provider, model.Code, isPersistent: model.RememberMe, rememberBrowser: model.RememberBrowser);
             switch (result)
             {
                 case SignInStatus.Success:
@@ -150,17 +150,23 @@ namespace Vidly.Controllers
             if (ModelState.IsValid)
             {
                 var user = new ApplicationUser
-                    { UserName = model.Email,
-                        Email = model.Email,
-                        DrivingLicence = model.DrivingLicence,
-                        CustomerPhoneNumber = model.CustomerPhoneNumer
-                    };
+                {
+                    UserName = model.Email,
+                    Email = model.Email,
+                    DrivingLicence = model.DrivingLicence,
+                    CustomerPhoneNumber = model.CustomerPhoneNumer
+                };
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
-                    await SignInManager.SignInAsync(user, isPersistent:false, rememberBrowser:false);
+                    //var roleStore = new RoleStore<IdentityRole>(new ApplicationDbContext());
+                    //var roleManager = new RoleManager<IdentityRole>(roleStore);
+                    //await roleManager.CreateAsync(new IdentityRole("CanManageCustomers"));
+                    //await UserManager.AddToRoleAsync(user.Id, "CanManageCustomers");
 
-                   // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=320771
+                    await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
+
+                    // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=320771
                     // Send an email with this link
                     // string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
                     // var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
@@ -371,10 +377,11 @@ namespace Vidly.Controllers
                     return View("ExternalLoginFailure");
                 }
                 var user = new ApplicationUser
-                    { UserName = model.Email,
-                        Email = model.Email,
-                        DrivingLicence = model.DrivingLicence
-                    };
+                {
+                    UserName = model.Email,
+                    Email = model.Email,
+                    DrivingLicence = model.DrivingLicence
+                };
                 var result = await UserManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
